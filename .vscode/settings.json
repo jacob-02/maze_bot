@@ -1,0 +1,12 @@
+{
+    "python.autoComplete.extraPaths": [
+        "/home/jacob/Documents/pathplanning_ws/install/mazebot/lib/python3.8/site-packages",
+        "/home/jacob/Documents/pathplanning_ws/install/maze_bot/lib/python3.8/site-packages",
+        "/opt/ros/foxy/lib/python3.8/site-packages"
+    ],
+    "python.analysis.extraPaths": [
+        "/home/jacob/Documents/pathplanning_ws/install/mazebot/lib/python3.8/site-packages",
+        "/home/jacob/Documents/pathplanning_ws/install/maze_bot/lib/python3.8/site-packages",
+        "/opt/ros/foxy/lib/python3.8/site-packages"
+    ]
+}
