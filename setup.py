@@ -25,6 +25,8 @@ setup(
     tests_require=['pytest'],
     entry_points={
         'console_scripts': [
+            'driving_mazebot = maze_bot.driving_node:main',
+            'go_to_goal = maze_bot.go_to_goal:main'
         ],
     },
 )
