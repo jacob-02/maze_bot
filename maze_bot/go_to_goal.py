@@ -11,7 +11,7 @@ import sys
 class robot_go_to_goal(Node):
 
     def __init__(self):
-        super().__init__('goal_movement_node')
+        super().__init__("goal_movement_node", parameter_overrides=[])
         self.vel_pub = self.create_publisher(Twist, '/cmd_vel', 10)
         timer_period = 0.2  # seconds
         self.pose_sub = self.create_subscription(
