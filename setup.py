@@ -27,7 +27,8 @@ setup(
     entry_points={
         'console_scripts': [
             'driving_mazebot = maze_bot.driving_node:main',
-            'go_to_goal = maze_bot.go_to_goal:main'
+            'go_to_goal = maze_bot.go_to_goal:main',
+            'video_get = maze_bot.video_save:main'
         ],
     },
 )
