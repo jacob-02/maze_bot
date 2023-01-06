@@ -123,12 +123,6 @@ class bot_localizer():
         # Storing Crop and Rot Parameters required to maintain frame of refrence in the orig image
         self.update_frameofrefrence_parameters(X, Y, W, H, 90)
 
-        cv2.imshow("1a. rois_mask", rois_mask)
-        cv2.imshow("1b. frame_car_remvd", frame_car_remvd)
-        cv2.imshow("1c. Ground_replica", Ground_replica)
-        cv2.imshow("1d. bg_model", self.bg_model)
-        cv2.imshow("2. maze_og", self.maze_og)
-
     def get_car_loc(self, car_cnt, car_mask):
 
         # a) Get the centroid of the car
@@ -173,8 +167,8 @@ class bot_localizer():
         frame_disp[car_mask > 0] = frame_disp[car_mask > 0] + (0, 64, 0)
         frame_disp[car_circular_mask > 0] = (0, 0, 255)
 
-        cv2.imshow("1d. bg_model", self.bg_model)
-        cv2.imshow("2. maze_og", self.maze_og)
+        # cv2.imshow("1d. bg_model", self.bg_model)
+        # cv2.imshow("2. maze_og", self.maze_og)
 
         cv2.imshow("car_localized", frame_disp)
-        cv2.imshow("Detected_foreground(car)", car_mask)
+        # cv2.imshow("Detected_foreground(car)", car_mask)
