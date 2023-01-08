@@ -5,6 +5,7 @@ from cv_bridge import CvBridge
 from sensor_msgs.msg import Image
 from geometry_msgs.msg import Twist
 from .bot_localization import bot_localizer
+from .bot_mapping import bot_mapper 
 import numpy as np
 
 
@@ -21,6 +22,7 @@ class MazeSolver(Node):
         timer_period = 0.5  # seconds
         self.timer = self.create_timer(timer_period, self.maze_solving)
         self.localizer = bot_localizer()
+        self.mapper = bot_mapper()
         self.bridge = CvBridge()
         self.sat_view = np.zeros((100,100))
 
@@ -31,13 +33,9 @@ class MazeSolver(Node):
         cv2.waitKey(1)
 
     def maze_solving(self):
-        # msg = Twist()
-        # msg.linear.x = 3.0
-        # msg.angular.z = 0.0
-        # self.publisher_.publish(msg)
         frame_disp = self.sat_view.copy()
         self.localizer.localize_bot(self.sat_view, frame_disp=frame_disp)
-
+        self.mapper.graphify(self.localizer.maze_og)
 
 def main(args=None):
     rclpy.init(args=args)
