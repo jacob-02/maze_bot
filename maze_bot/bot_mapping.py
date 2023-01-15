@@ -26,7 +26,7 @@ class Graph():
 
     def display_graph(self):
         for key, value in self.graph.items():
-            print("key{} has value {},{}".format(key, value))
+            print("key{} has value {}".format(key, value))
 
 
 class bot_mapper():
@@ -46,6 +46,8 @@ class bot_mapper():
         self.connected_upleft = False
 
         self.maze_connect = []
+
+        self.maze = 0
 
     def display_connected_nodes(self, curr_node, neighbor_node, case="Unkown", color=(0, 0, 255)):
         curr_pixel = (curr_node[1], curr_node[0])
@@ -83,8 +85,8 @@ class bot_mapper():
                 self.Graph.add_vertex(
                     curr_node, neighbor_node, neighbor_case, cost)
                 self.Graph.add_vertex(neighbor_node, curr_node, case, cost)
-                print("\nConnected {} to {} with Case [step_l,step_up] = [ {} , {} ] & Cost -> {}".format(
-                    curr_node, neighbor_node, step_l, step_up, cost))
+                # print("\nConnected {} to {} with Case [step_l,step_up] = [ {} , {} ] & Cost -> {}".format(
+                    # curr_node, neighbor_node, step_l, step_up, cost))
 
                 # Vertex <-Connected-> Neighbor ===) Cycle through Next Possible Routes [topleft,top,top_right]
                 if not self.connected_left:
@@ -264,12 +266,6 @@ class bot_mapper():
         no_of_pathways = (top_left + top + top_rgt + lft +
                           0 + rgt + btm_left + btm + btm_rgt)
 
-        if no_of_pathways > 2:
-            print("  [ top_left , top      , top_rgt  ,lft    , rgt      , btm_left , btm      , btm_rgt   ] \n [ ", str(top_left), " , ", str(top), " , ", str(
-                top_rgt), " ,\n   ", str(lft), " , ", "-", " , ", str(rgt), " ,\n   ", str(btm_left), " , ", str(btm), " , ", str(btm_rgt), " ] ")
-            print("\nno_of_pathways [row,col]= [ ", curr_row,
-                  " , ", curr_col, " ] ", no_of_pathways)
-
         return top_left, top, top_rgt, rgt, btm_rgt, btm, btm_left, lft, no_of_pathways
 
     def reset_connct_paramtrs(self):
@@ -286,7 +282,7 @@ class bot_mapper():
 
         # Initalizing Maze_connect with Colored Maze"Nodes Conected"
         self.maze_connect = cv2.cvtColor(maze, cv2.COLOR_GRAY2BGR)
-        cv2.namedWindow("Nodes Conected", cv2.WINDOW_FREERATIO)
+        # cv2.namedWindow("Nodes Conected", cv2.WINDOW_FREERATIO)
 
         # Initialize counts of Ip's
         turns = 0
@@ -317,7 +313,7 @@ class bot_mapper():
                             # Start point
                             # print("Start point found at [",row,",",col,"]")
                             maze_bgr[row][col] = (0, 128, 255)
-                            cv2.imshow("Maze(IP)", maze_bgr)
+                            # cv2.imshow("Maze(IP)", maze_bgr)
 
                             self.Graph.add_vertex((row, col), case="Start")
                             self.Graph.start = (row, col)
@@ -325,7 +321,7 @@ class bot_mapper():
                             # End point
                             # print("End point found at [",row,",",col,"]")
                             maze_bgr[row][col] = (0, 255, 0)
-                            cv2.imshow("Maze(IP)", maze_bgr)
+                            # cv2.imshow("Maze(IP)", maze_bgr)
                             self.Graph.add_vertex((row, col), case="End")
                             self.Graph.end = (row, col)
                             # Connecting vertex to its neighbor (if-any)
@@ -341,7 +337,7 @@ class bot_mapper():
                         if draw_intrstpts:
                             maze_bgr = cv2.circle(
                                 maze_bgr, (col, row), 10, (0, 0, 255), 2)
-                        cv2.imshow("Maze(IP)", maze_bgr)
+                        # cv2.imshow("Maze(IP)", maze_bgr)
                         self.Graph.add_vertex((row, col), case="DeadEnd")
                         # Connecting vertex to its neighbor (if-any)
                         self.reset_connct_paramtrs()
@@ -360,7 +356,7 @@ class bot_mapper():
                         if draw_intrstpts:
                             maze_bgr = cv2.circle(
                                 maze_bgr, (col, row), 1, (255, 0, 0), 2)
-                        cv2.imshow("Maze(IP)", maze_bgr)
+                        # cv2.imshow("Maze(IP)", maze_bgr)
                         self.Graph.add_vertex((row, col), case="Turn")
                         # Connecting vertex to its neighbor (if-any)
                         self.reset_connct_paramtrs()
@@ -374,7 +370,7 @@ class bot_mapper():
                             if draw_intrstpts:
                                 maze_bgr = self.triangle(
                                     maze_bgr, (col, row), 10, (144, 140, 255), 4)
-                                cv2.imshow("Maze(IP)", maze_bgr)
+                                # cv2.imshow("Maze(IP)", maze_bgr)
                                 self.Graph.add_vertex(
                                     (row, col), case="3-Junc")
                                 # Connecting vertex to its neighbor (if-any)
@@ -388,7 +384,7 @@ class bot_mapper():
                             if draw_intrstpts:
                                 cv2.rectangle(
                                     maze_bgr, (col-10, row-10), (col+10, row+10), (255, 215, 0), 4)
-                                cv2.imshow("Maze(IP)", maze_bgr)
+                                # cv2.imshow("Maze(IP)", maze_bgr)
                                 self.Graph.add_vertex(
                                     (row, col), case="4-Junc")
                                 # Connecting vertex to its neighbor (if-any)
@@ -396,16 +392,15 @@ class bot_mapper():
                                 self.connect_neighbors(
                                     maze, row, col, "4-Junc")
                                 junc_4 += 1
-        # print("\nInterest Points !!! \n[ Turns , 3_Junc , 4_Junc ] [ ",turns," , ",junc_3," , ",junc_4," ] \n")
 
     def graphify(self, extracted_maze):  # Extracted maze is received from the localization stage
 
         if not self.graphified:
             # print(extracted_maze)
-            cv2.imshow("Extracted Maze", extracted_maze)
+            # cv2.imshow("Extracted Maze", extracted_maze)
 
             thinned = cv2.ximgproc.thinning(extracted_maze)
-            cv2.imshow("Initial Thinned Maze", thinned)
+            # cv2.imshow("Initial Thinned Maze", thinned)
 
             # Dilate
             kernel = cv2.getStructuringElement(cv2.MORPH_ELLIPSE, (2, 2))
@@ -414,13 +409,13 @@ class bot_mapper():
             _, bw2 = cv2.threshold(
                 thinned_dilated, 0, 255, cv2.THRESH_BINARY | cv2.THRESH_OTSU)
             thinned = cv2.ximgproc.thinning(bw2)
-            cv2.imshow("Dilated Thinned Maze", thinned)
+            # cv2.imshow("Dilated Thinned Maze", thinned)
 
             # Cropping : Things outside the maze might get into the variable
 
             thinned_cropped = thinned[self.crp_amt:thinned.shape[0] -
                                       self.crp_amt, self.crp_amt:thinned.shape[1]-self.crp_amt]
-            cv2.imshow("Cropped Thinned Maze", thinned_cropped)
+            # cv2.imshow("Cropped Thinned Maze", thinned_cropped)
 
             extracted_maze_cropped = extracted_maze[self.crp_amt:extracted_maze.shape[0] -
                                                     self.crp_amt, self.crp_amt:extracted_maze.shape[1]-self.crp_amt]
@@ -428,7 +423,6 @@ class bot_mapper():
                 extracted_maze_cropped, cv2.COLOR_GRAY2BGR)
             extracted_maze_cropped[thinned_cropped > 0] = (0, 255, 255)
 
-            cv2.imshow("thinned Overlayed on Extracted Maze",
-                       extracted_maze_cropped)
-
             self.one_pass(thinned_cropped)
+
+            self.maze = thinned_cropped
