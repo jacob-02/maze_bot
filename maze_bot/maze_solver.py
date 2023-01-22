@@ -39,7 +39,7 @@ class MazeSolver(Node):
         self.mapper.graphify(self.localizer.maze_og)
 
         self.planner.find_path_nd_display(
-            self.mapper.Graph.graph, self.mapper.Graph.start, self.mapper.Graph.end, self.mapper.maze, method="DFS")
+            self.mapper.Graph.graph, self.mapper.Graph.start, self.mapper.Graph.end, self.mapper.maze, method="dijkstra")
 
 def main(args=None):
     rclpy.init(args=args)

@@ -27,6 +27,7 @@ class bot_pathplanner():
 
     def __init__(self):
         self.DFS = DFS()
+        self.dijisktra = Dijkstra()
 
     @staticmethod
     def cords_to_pts(cords):
@@ -67,6 +68,13 @@ class bot_pathplanner():
          # type: ignore
             paths = self.DFS.get_paths(graph, start, end)
             path_to_display = paths[0]
+        
+        elif method == "dijkstra":
+            if not self.dijisktra.shortestPath_found:
+                self.dijisktra.find_best_path(graph, start, end) 
+            
+            path_to_display = self.dijisktra.shortestPath
+            Path_str = "Shortest: " + str(Path_str)
 
         pathpts_to_display = self.cords_to_pts(path_to_display)
         self.draw_path_on_maze(maze, pathpts_to_display, method)
@@ -128,3 +136,68 @@ class Heap():
         if self.posOfVertices[v] < self.size:
             return True
         return False
+
+
+class Dijkstra():
+
+    def __init__(self):
+        self.shortestPath_found = False
+        self.shortestPath = []
+        self.minHeap = Heap()
+
+        self.idx2vrtx = {}
+        self.vrtx2idx = {}
+
+    def ret_shortest_path(self, parent, start, end, route):
+        route.append(self.idx2vrtx[end])
+
+        if (end == start):
+            return
+
+        end = parent[end]
+
+        self.ret_shortest_path(parent, start, end, route)
+
+    def find_best_path(self, graph, start, end):
+        start_idx = [idx for idx, key in enumerate(
+            graph.items()) if key[0] == start][0]
+
+        dist = []
+        parent = []
+
+        self.minHeap.size = len(graph.keys())
+
+        for idx, v in enumerate(graph.keys()):
+            dist.append(float("inf"))
+            self.minHeap.array.append(
+                self.minHeap.newMinHeapNode(idx, dist[idx]))
+            self.minHeap.posOfVertices.append(idx)
+            parent.append(-1)
+            self.idx2vrtx[idx] = v
+            self.vrtx2idx[v] = idx
+
+        dist[start_idx] = 0
+        self.minHeap.decreaseKey(start_idx, dist[start_idx])
+
+        while self.minHeap.size != 0:
+            newHeapNode = self.minHeap.extractMin()
+            u_idx = newHeapNode[0]
+
+            u = self.idx2vrtx[u_idx]
+
+            for v in graph[u]:
+                if v != "case":
+                    v_idx = self.vrtx2idx[v]
+                    if self.minHeap.isInMinHeap(v_idx) and dist[u_idx] != float("inf") and dist[u] + graph[u][v]["cost"] < dist[v_idx]:
+                        dist[v_idx] = dist[u_idx] + graph[u][v]["cost"]
+                        parent[v_idx] = u_idx
+                        self.minHeap.decreaseKey(v_idx, dist[v_idx])
+
+            if u == end:
+                break
+        
+        shortest_path = []
+        self.ret_shortest_path(parent, start_idx, self.vrtx2idx[end], shortest_path)
+
+        self.shortest_path = shortest_path[::-1]
+        self.shortestPath_found = True
