@@ -39,4 +39,4 @@ Please report any issue or bug you encounter in the issue section.
 Any contribution is welcome, feel free to fork the repo and open a pull request.
 
 ## License
-This package is licensed under the MIT License.
+This package is licensed under the Apache 2.0 License.
