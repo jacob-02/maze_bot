@@ -29,6 +29,8 @@ class bot_pathplanner():
         self.DFS = DFS()
         self.dijisktra =dijisktra()
 
+        self.path_to_goal = []
+
     @staticmethod
     def cords_to_pts(cords):
         return [cord[::-1] for cord in cords]
@@ -74,6 +76,8 @@ class bot_pathplanner():
                 self.dijisktra.find_best_routes(graph, start, end)
 
             path_to_display = self.dijisktra.shortest_path
+        
+        self.path_to_goal = path_to_display
 
         pathpts_to_display = self.cords_to_pts(path_to_display)
         self.draw_path_on_maze(maze, pathpts_to_display, method)

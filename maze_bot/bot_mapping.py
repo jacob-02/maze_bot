@@ -426,3 +426,4 @@ class bot_mapper():
             self.one_pass(thinned_cropped)
 
             self.maze = thinned_cropped
+            self.graphified = True
