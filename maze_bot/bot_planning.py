@@ -27,7 +27,7 @@ class bot_pathplanner():
 
     def __init__(self):
         self.DFS = DFS()
-        self.dijisktra = Dijkstra()
+        self.dijisktra =dijisktra()
 
     @staticmethod
     def cords_to_pts(cords):
@@ -68,136 +68,223 @@ class bot_pathplanner():
          # type: ignore
             paths = self.DFS.get_paths(graph, start, end)
             path_to_display = paths[0]
-        
+
         elif method == "dijkstra":
-            if not self.dijisktra.shortestPath_found:
-                self.dijisktra.find_best_path(graph, start, end) 
-            
-            path_to_display = self.dijisktra.shortestPath
-            Path_str = "Shortest: " + str(Path_str)
+            if not self.dijisktra.shortestpath_found  :
+                self.dijisktra.find_best_routes(graph, start, end)
+
+            path_to_display = self.dijisktra.shortest_path
 
         pathpts_to_display = self.cords_to_pts(path_to_display)
         self.draw_path_on_maze(maze, pathpts_to_display, method)
-        cv2.waitKey(0)
-
+        # cv2.waitKey(0)
 
 class Heap():
 
     def __init__(self):
+        # Priority queue will be stored in an array (list of list containing vertex and their resp distance)
         self.array = []
+        # Counter to track nodes left in priority queue
         self.size = 0
+        # Curr_pos of each vertex is stored
         self.posOfVertices = []
 
-    def newMinHeapNode(self, v, dist):
-        minHeapNode = ([v, dist])
-        return minHeapNode
+    # create a minheap node => List(vertex,distance)
+    def new_minHeap_node(self, v, dist):
+        return([v, dist])
 
-    def meanHeapify(self, idx):
-        smallest = idx
-        left = 2 * idx + 1
-        right = 2 * idx + 2
+    # Swap node a (List_A) with node b (List_b)
+    def swap_nodes(self, a, b):
+        temp = self.array[a]
+        self.array[a] = self.array[b]
+        self.array[b] = temp
 
-        if left < self.size and self.array[left][1] < self.array[smallest][1]:
+    # Convert any part of complete tree in minHeap in O(nlogn) time
+    def minHeapify(self, node_idx):
+        smallest = node_idx
+        left = (node_idx*2)+1
+        right = (node_idx*2)+2
+
+        if ((left < self.size) and (self.array[left][1] < self.array[smallest][1])):
             smallest = left
-
-        if right < self.size and self.array[right][1] < self.array[smallest][1]:
+        if ((right < self.size) and (self.array[right][1] < self.array[smallest][1])):
             smallest = right
 
-        if smallest != idx:
-            self.posOfVertices[self.array[smallest][0]] = idx
-            self.posOfVertices[self.array[idx][0]] = smallest
-            self.array[smallest], self.array[idx] = self.array[idx], self.array[smallest]
-            self.meanHeapify(smallest)
+        # If node_idx is not the smallest
+        if(smallest != node_idx):
+            # Update the positions to keep smallest on top
+            self.posOfVertices[self.array[node_idx][0]] = smallest
+            self.posOfVertices[self.array[smallest][0]] = node_idx
+            # Swap node_idx with smallest
+            self.swap_nodes(node_idx, smallest)
+            # Recursively call minHeapify until all subnodes part of minheap or no more subnodes left
+            self.minHeapify(smallest)
 
-    def extractMin(self):
+    # extract top (min value) node from the min-heap => then minheapify to keep heap property
+    def extractmin(self):
+
+        # Handling boudary condtion
         if self.size == 0:
             return
 
+        # root node (list[root_vertex,root_value]) extracted
         root = self.array[0]
-        lastNode = self.array[self.size - 1]
+
+        # Move Last node to top
+        lastNode = self.array[self.size-1]
         self.array[0] = lastNode
+
+        # Update the postion of vertices
+        self.posOfVertices[root[0]] = self.size-1
         self.posOfVertices[lastNode[0]] = 0
-        self.posOfVertices[root[0]] = self.size - 1
+
+        # Decrease the size of minheap by 1
         self.size -= 1
-        self.meanHeapify(0)
+
+        # Perform Minheapify from root
+        self.minHeapify(0)
+        # Return extracted root node to user
         return root
 
-    def decreaseKey(self, v, dist):
-        i = self.posOfVertices[v]
-        self.array[i][1] = dist
-        while i > 0 and self.array[i][1] < self.array[(i - 1) // 2][1]:
-            self.posOfVertices[self.array[i][0]] = (i - 1) // 2
-            self.posOfVertices[self.array[(i - 1) // 2][0]] = i
-            self.array[i], self.array[(
-                i - 1) // 2] = self.array[(i - 1) // 2], self.array[i]
-            i = (i - 1) // 2
+    # Update distance for a node to a new found shorter distance
+    def decreaseKey(self, vertx, dist):
 
+        # retreviing the idx of vertex we want to decrease value of
+        idxofvertex = self.posOfVertices[vertx]
+
+        self.array[idxofvertex][1] = dist
+
+        # Travel up while complete heap is not heapified
+        # While idx is valid and (Updated_key_dist < Parent_key_dist)
+        while((idxofvertex > 0) and (self.array[idxofvertex][1] < self.array[(idxofvertex-1)//2][1])):
+            # Update position of parent and curr_node
+            self.posOfVertices[self.array[idxofvertex][0]] = (idxofvertex-1)//2
+            self.posOfVertices[self.array[(idxofvertex-1)//2][0]] = idxofvertex
+
+            # Swap curr_node with parent
+            self.swap_nodes(idxofvertex, (idxofvertex-1)//2)
+
+            # Navigate to parent and start process again
+            idxofvertex = (idxofvertex-1)//2
+
+    # A utility function to check if a given
+    # vertex 'v' is in min heap or not
     def isInMinHeap(self, v):
+
         if self.posOfVertices[v] < self.size:
             return True
         return False
 
 
-class Dijkstra():
+class dijisktra():
 
     def __init__(self):
-        self.shortestPath_found = False
-        self.shortestPath = []
+
+        # State variable
+        self.shortestpath_found = False
+        # Once found save the shortest path
+        self.shortest_path = []
+
+        self.shortest_path_overlayed = []
+
+        # instance variable assigned obj of heap class for implementing required priority queue
         self.minHeap = Heap()
 
-        self.idx2vrtx = {}
-        self.vrtx2idx = {}
+        # Creating dictionaries to manage the world
+        self.idxs2vrtxs = {}
+        self.vrtxs2idxs = {}
+        # Counter added to track total nodes visited to
+        #               reach goal node
+        self.dijiktra_nodes_visited = 0
 
-    def ret_shortest_path(self, parent, start, end, route):
-        route.append(self.idx2vrtx[end])
+    def ret_shortestroute(self, parent, start, end, route):
 
+        # Keep updating the shortest route from end to start by visiting closest vertices starting fron end
+        route.append(self.idxs2vrtxs[end])
+
+        # Once we have reached the start (maze_entry) => Stop! We found the shortest route
         if (end == start):
             return
 
+        # Visit closest vertex to each node
         end = parent[end]
+        # Recursively call function with new end point until we reach start
+        self.ret_shortestroute(parent, start, end, route)
 
-        self.ret_shortest_path(parent, start, end, route)
+    def find_best_routes(self, graph, start, end):
 
-    def find_best_path(self, graph, start, end):
+        # Teaking the first item of the list created by list comprehension
+        # Which is while looping over the key value pair of graph. Return the pairs_idx that match the start key
         start_idx = [idx for idx, key in enumerate(
             graph.items()) if key[0] == start][0]
+        print("Index of search key : {}".format(start_idx))
 
+        # Distanc list storing dist of each node
         dist = []
+        # Storing found shortest subpaths [format ==> (parent_idx = closest_child_idx)]
         parent = []
 
+        # Set size of minHeap to be the total no of keys in the graph.
         self.minHeap.size = len(graph.keys())
 
         for idx, v in enumerate(graph.keys()):
-            dist.append(float("inf"))
-            self.minHeap.array.append(
-                self.minHeap.newMinHeapNode(idx, dist[idx]))
-            self.minHeap.posOfVertices.append(idx)
-            parent.append(-1)
-            self.idx2vrtx[idx] = v
-            self.vrtx2idx[v] = idx
 
+            # Initialize dist for all vertices to inf
+            dist.append(1e7)
+            # Creating BinaryHeap by adding one node([vrtx2idx(v),dist]) at a time to minHeap Array
+            # So instead of vertex which is a tuple representing an Ip we pass in an index
+            self.minHeap.array.append(
+                self.minHeap.new_minHeap_node(idx, dist[idx]))
+            self.minHeap.posOfVertices.append(idx)
+
+            # Initializing parent_nodes_list with -1 for all indices
+            parent.append(-1)
+            # Updating dictionaries of vertices and their positions
+            self.vrtxs2idxs[v] = idx
+            self.idxs2vrtxs[idx] = v
+
+        # Set dist of start_idx to 0 while evertything else remains Inf
         dist[start_idx] = 0
+        # Decrease Key as new found dist of start_vertex is 0
         self.minHeap.decreaseKey(start_idx, dist[start_idx])
 
-        while self.minHeap.size != 0:
-            newHeapNode = self.minHeap.extractMin()
-            u_idx = newHeapNode[0]
+        # Loop as long as Priority Queue has nodes.
+        while(self.minHeap.size != 0):
 
-            u = self.idx2vrtx[u_idx]
+            # Counter added for keeping track of nodes visited to reach goal node
+            self.dijiktra_nodes_visited += 1
 
+            # Retrieve the node with the min dist (Highest priority)
+            curr_top = self.minHeap.extractmin()
+            u_idx = curr_top[0]
+            u = self.idxs2vrtxs[u_idx]
+
+            # check all neighbors of vertex u and update their distance if found shorter
             for v in graph[u]:
+                # Ignore Case node
                 if v != "case":
-                    v_idx = self.vrtx2idx[v]
-                    if self.minHeap.isInMinHeap(v_idx) and dist[u_idx] != float("inf") and dist[u] + graph[u][v]["cost"] < dist[v_idx]:
-                        dist[v_idx] = dist[u_idx] + graph[u][v]["cost"]
-                        parent[v_idx] = u_idx
+
+                    print("Vertex adjacent to {} is {}".format(u, v))
+                    v_idx = self.vrtxs2idxs[v]
+
+                    # if we have not found shortest distance to v + new found dist < known dist ==> Update dist for v
+                    if (self.minHeap.isInMinHeap(v_idx) and (dist[u_idx] != 1e7) and
+                       ((graph[u][v]["cost"] + dist[u_idx]) < dist[v_idx])):
+
+                        dist[v_idx] = graph[u][v]["cost"] + dist[u_idx]
                         self.minHeap.decreaseKey(v_idx, dist[v_idx])
+                        parent[v_idx] = u_idx
 
-            if u == end:
+            # End Condition: When our End goal has already been visited.
+            #                This means shortest part to end goal has already been found
+            #     Do   --->              Break Loop
+            if (u == end):
                 break
-        
-        shortest_path = []
-        self.ret_shortest_path(parent, start_idx, self.vrtx2idx[end], shortest_path)
 
+        shortest_path = []
+        self.ret_shortestroute(
+            parent, start_idx, self.vrtxs2idxs[end], shortest_path)
+
+        # Return route (reversed) to start from the beginned
         self.shortest_path = shortest_path[::-1]
-        self.shortestPath_found = True
+        self.shortestpath_found = True
