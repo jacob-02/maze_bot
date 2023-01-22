@@ -4,6 +4,7 @@ import sys
 
 sys.setrecursionlimit(10**6)
 
+
 class DFS():
 
     @staticmethod
@@ -70,3 +71,60 @@ class bot_pathplanner():
         pathpts_to_display = self.cords_to_pts(path_to_display)
         self.draw_path_on_maze(maze, pathpts_to_display, method)
         cv2.waitKey(0)
+
+
+class Heap():
+
+    def __init__(self):
+        self.array = []
+        self.size = 0
+        self.posOfVertices = []
+
+    def newMinHeapNode(self, v, dist):
+        minHeapNode = ([v, dist])
+        return minHeapNode
+
+    def meanHeapify(self, idx):
+        smallest = idx
+        left = 2 * idx + 1
+        right = 2 * idx + 2
+
+        if left < self.size and self.array[left][1] < self.array[smallest][1]:
+            smallest = left
+
+        if right < self.size and self.array[right][1] < self.array[smallest][1]:
+            smallest = right
+
+        if smallest != idx:
+            self.posOfVertices[self.array[smallest][0]] = idx
+            self.posOfVertices[self.array[idx][0]] = smallest
+            self.array[smallest], self.array[idx] = self.array[idx], self.array[smallest]
+            self.meanHeapify(smallest)
+
+    def extractMin(self):
+        if self.size == 0:
+            return
+
+        root = self.array[0]
+        lastNode = self.array[self.size - 1]
+        self.array[0] = lastNode
+        self.posOfVertices[lastNode[0]] = 0
+        self.posOfVertices[root[0]] = self.size - 1
+        self.size -= 1
+        self.meanHeapify(0)
+        return root
+
+    def decreaseKey(self, v, dist):
+        i = self.posOfVertices[v]
+        self.array[i][1] = dist
+        while i > 0 and self.array[i][1] < self.array[(i - 1) // 2][1]:
+            self.posOfVertices[self.array[i][0]] = (i - 1) // 2
+            self.posOfVertices[self.array[(i - 1) // 2][0]] = i
+            self.array[i], self.array[(
+                i - 1) // 2] = self.array[(i - 1) // 2], self.array[i]
+            i = (i - 1) // 2
+
+    def isInMinHeap(self, v):
+        if self.posOfVertices[v] < self.size:
+            return True
+        return False
