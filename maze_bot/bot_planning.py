@@ -30,6 +30,7 @@ class bot_pathplanner():
         self.dijisktra =dijisktra()
 
         self.path_to_goal = []
+        self.img_shortest_path = []
 
     @staticmethod
     def cords_to_pts(cords):
@@ -76,10 +77,9 @@ class bot_pathplanner():
                 self.dijisktra.find_best_routes(graph, start, end)
 
             path_to_display = self.dijisktra.shortest_path
-        
-        self.path_to_goal = path_to_display
 
         pathpts_to_display = self.cords_to_pts(path_to_display)
+        self.path_to_goal = pathpts_to_display
         self.draw_path_on_maze(maze, pathpts_to_display, method)
         # cv2.waitKey(0)
 

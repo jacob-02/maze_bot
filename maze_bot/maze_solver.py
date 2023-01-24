@@ -58,8 +58,10 @@ class MazeSolver(Node):
         path = self.planner.path_to_goal
         self.motion_planner.nav_path(bot_loc, path, self.vel_msg, self.publisher_)
 
-        self.vel_msg.linear.x = 0.0
-        self.vel_msg.angular.z = 0.0
+        img_shortest_path = self.planner.img_shortest_path
+        self.motion_planner.display_control_mechanism_in_action(bot_loc, path, img_shortest_path, self.localizer, frame_disp)
+        cv2.imshow("Maze (live)", frame_disp)
+        cv2.waitKey(1)
 
         self.publisher_.publish(self.vel_msg)
 

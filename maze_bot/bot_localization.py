@@ -166,9 +166,3 @@ class bot_localizer():
         car_circular_mask = cv2.bitwise_xor(car_circular_mask, car_mask)
         frame_disp[car_mask > 0] = frame_disp[car_mask > 0] + (0, 64, 0)
         frame_disp[car_circular_mask > 0] = (0, 0, 255)
-
-        # cv2.imshow("1d. bg_model", self.bg_model)
-        # cv2.imshow("2. maze_og", self.maze_og)
-
-        # cv2.imshow("car_localized", frame_disp)
-        # cv2.imshow("Detected_foreground(car)", car_mask)
